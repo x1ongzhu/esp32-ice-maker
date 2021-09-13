@@ -222,11 +222,22 @@ void convertBuffer(uint8_t *buffer, char *str, uint32_t length)
     }
 }
 
+bool cmd_equal(char *str0, char *str1, uint32_t len)
+{
+    for (uint32_t i = 0; i < len; i++)
+    {
+        if (str0[i] != str1[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 static void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *param)
 {
     /* actually, should post to blufi_task handle the procedure,
      * now, as a example, we do it more simply */
-    char str[10];
     switch (event)
     {
     case ESP_BLUFI_EVENT_INIT_FINISH:
@@ -369,13 +380,49 @@ static void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_para
         break;
     }
     case ESP_BLUFI_EVENT_RECV_CUSTOM_DATA:
-        BLUFI_INFO("Recv Custom Data %d\n", param->custom_data.data_len);
-        esp_log_buffer_hex("Custom Data Hex", param->custom_data.data, param->custom_data.data_len);
-        esp_log_buffer_char("Custom Data Char", param->custom_data.data, param->custom_data.data_len);
+    {
+        BLUFI_INFO("Recv Custom Data Len: %d", param->custom_data.data_len);
+        char str[param->custom_data.data_len];
         convertBuffer(param->custom_data.data, (char *)str, param->custom_data.data_len);
-        BLUFI_INFO("Recv Custom Data %s ", str);
-        BLUFI_INFO("Recv Custom Data %d ", sizeof("abc890"));
+        BLUFI_INFO("Recv Custom Data: %s ", str);
+        char *cmd = malloc(20);
+        char *cmd_val = malloc(50);
+        unsigned int cmd_i = 0, cmd_val_i = 0, k = 0;
+
+        for (unsigned int i = 0; i < param->custom_data.data_len; i++)
+        {
+            if (param->custom_data.data[i] == '#')
+            {
+                k++;
+                if (k >= 3)
+                {
+                    break;
+                }
+            }
+            else if (k == 1)
+            {
+                cmd[cmd_i] = param->custom_data.data[i];
+                cmd_i++;
+            }
+            else if (k == 2)
+            {
+                cmd_val[cmd_val_i] = param->custom_data.data[i];
+                cmd_val_i++;
+            }
+        }
+        cmd[cmd_i] = '\0';
+        cmd_i++;
+        cmd_val[cmd_val_i] = '\0';
+        cmd_val_i++;
+        BLUFI_INFO("Recv Custom CMD: %s ", cmd);
+        BLUFI_INFO("Recv Custom CMD VAL: %s ", cmd_val);
+
+        if (cmd_equal("set_mqtt", cmd, sizeof("set_mqtt")))
+        {
+            BLUFI_INFO("set mqtt host to: %s", cmd_val);
+        }
         break;
+    }
     case ESP_BLUFI_EVENT_RECV_USERNAME:
         /* Not handle currently */
         break;

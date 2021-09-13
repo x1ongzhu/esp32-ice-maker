@@ -23,7 +23,8 @@
         "regex": "c",
         "bitset": "c",
         "chrono": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "stdlib.h": "c"
     },
-    "idf.flashBaudRate": "300000",
+    "idf.flashBaudRate": "115200",
 }
