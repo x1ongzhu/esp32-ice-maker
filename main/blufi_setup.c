@@ -31,6 +31,7 @@
 
 #include "esp_blufi.h"
 #include "mqtt.h"
+#include "utils.h"
 
 static void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *param);
 
@@ -213,26 +214,6 @@ static esp_blufi_callbacks_t example_callbacks = {
     .decrypt_func = blufi_aes_decrypt,
     .checksum_func = blufi_crc_checksum,
 };
-
-void convertBuffer(uint8_t *buffer, char *str, uint32_t length)
-{
-    for (uint32_t i = 0; i < length; i++)
-    {
-        str[i] = buffer[i];
-    }
-}
-
-bool cmd_equal(char *str0, char *str1, uint32_t len)
-{
-    for (uint32_t i = 0; i < len; i++)
-    {
-        if (str0[i] != str1[i])
-        {
-            return false;
-        }
-    }
-    return true;
-}
 
 static void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *param)
 {
@@ -417,7 +398,7 @@ static void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_para
         BLUFI_INFO("Recv Custom CMD: %s ", cmd);
         BLUFI_INFO("Recv Custom CMD VAL: %s ", cmd_val);
 
-        if (cmd_equal("set_mqtt", cmd, sizeof("set_mqtt")))
+        if (cmd_equal("set_mqtt", cmd, sizeof("set_mqtt")) == 1)
         {
             BLUFI_INFO("set mqtt host to: %s", cmd_val);
         }

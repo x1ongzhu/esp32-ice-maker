@@ -24,7 +24,9 @@
         "bitset": "c",
         "chrono": "c",
         "algorithm": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "random": "c"
     },
     "idf.flashBaudRate": "115200",
 }
