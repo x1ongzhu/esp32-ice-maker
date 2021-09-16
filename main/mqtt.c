@@ -9,43 +9,15 @@
 
 #include "mqtt.h"
 #include "utils.h"
-#include "driver/gpio.h"
-#define LED_NO_WATER GPIO_NUM_2
-#define LED_FULL GPIO_NUM_15
-#define LED_BIG_ICE GPIO_NUM_22
-#define LED_SMALL_ICE GPIO_NUM_23
-#define BTN_START GPIO_NUM_12
-#define BTN_SEL GPIO_NUM_34
-static const char *TAG = "MQTT_EXAMPLE";
+#include "ice_maker.h"
+
+static const char *TAG = "MQTT";
 
 static void log_error_if_nonzero(const char *message, int error_code)
 {
     if (error_code != 0)
     {
         ESP_LOGE(TAG, "Last error %s: 0x%x", message, error_code);
-    }
-}
-
-void check_status()
-{
-    int a = 0, b = 0, c = 0, d = 0;
-    for (int i = 0; i < 1000; i++)
-    {
-        a += gpio_get_level(LED_NO_WATER);
-        b += gpio_get_level(LED_FULL);
-        c += gpio_get_level(LED_BIG_ICE);
-        d += gpio_get_level(LED_SMALL_ICE);
-        vTaskDelay(1 / portTICK_RATE_MS);
-    }
-    ESP_LOGI("ICE_MAKER", "LED_NO_WATER: %d LED_FULL:%d LED_BIG_ICE:%d LED_SMALL_ICE:%d", a, b, c, d);
-}
-
-void check_status_task()
-{
-    while (true)
-    {
-        check_status();
-        vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
 
@@ -93,14 +65,11 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         {
             if (cmd_equal("ON", event->data, event->data_len))
             {
-                gpio_set_level(12, 0);
-                vTaskDelay(200 / portTICK_RATE_MS);
-                gpio_set_level(12, 1);
-                esp_mqtt_client_publish(event->client, "home/ice_maker/get", "ON", 0, 1, 0);
+                start_making_ice();
             }
             else if (cmd_equal("OFF", event->data, event->data_len))
             {
-                esp_mqtt_client_publish(event->client, "home/ice_maker/get", "OFF", 0, 1, 0);
+                stop_making_ice();
             }
         }
         break;
@@ -131,6 +100,4 @@ void setup_mqtt(void)
     /* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
     esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
     esp_mqtt_client_start(mqtt_client);
-
-    xTaskCreate(check_status_task, "check_status", 2048, NULL, 10, NULL);
 }
