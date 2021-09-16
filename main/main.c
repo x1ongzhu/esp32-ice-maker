@@ -14,8 +14,8 @@
 #include "blufi_setup.h"
 #include "mqtt.h"
 #include "ice_maker.h"
-#include <u8g2.h>
-#include "u8g2_esp32_hal.h"
+// #include <u8g2.h>
+// #include "u8g2_esp32_hal.h"
 
 // SDA - GPIO21
 #define PIN_SDA 16

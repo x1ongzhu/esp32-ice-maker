@@ -5,7 +5,7 @@
 #include "freertos/semphr.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
-#define GPIO_INPUT_PIN_SEL  ((1ULL<<LED_BIG_ICE) | (1ULL<<LED_SMALL_ICE))
+#define GPIO_INPUT_PIN_SEL ((1ULL << LED_BIG_ICE) | (1ULL << LED_SMALL_ICE))
 #define ESP_INTR_FLAG_DEFAULT 0
 static const char *TAG = "ICE_MAKER";
 
@@ -89,6 +89,14 @@ void init_ice_maker(void)
     //hook isr handler for specific gpio pin
     gpio_isr_handler_add(LED_SMALL_ICE, gpio_isr_handler, (void *)LED_SMALL_ICE);
 
+    gpio_set_direction(18, GPIO_MODE_OUTPUT);
+    int cnt = 0;
+    while (1)
+    {
+        cnt++;
+        vTaskDelay(1000 / portTICK_RATE_MS);
+        gpio_set_level(18, cnt % 2);
+    }
 }
 void start_making_ice(void) {}
 void stop_making_ice(void) {}
