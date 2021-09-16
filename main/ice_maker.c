@@ -5,7 +5,7 @@
 #include "freertos/semphr.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
-#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<LED_BIG_ICE) | (1ULL<<LED_SMALL_ICE))
+#define GPIO_INPUT_PIN_SEL  ((1ULL<<LED_BIG_ICE) | (1ULL<<LED_SMALL_ICE))
 #define ESP_INTR_FLAG_DEFAULT 0
 static const char *TAG = "ICE_MAKER";
 
