@@ -1,10 +1,10 @@
 #pragma once
 #include "driver/gpio.h"
 
-#define LED_BIG_ICE GPIO_NUM_12
-#define LED_SMALL_ICE GPIO_NUM_14
-#define BTN_START GPIO_NUM_21
-#define BTN_SEL GPIO_NUM_19
+#define LED_BIG_ICE 12
+#define LED_SMALL_ICE 14
+#define BTN_START 21
+#define BTN_SEL 19
 
 static unsigned int ice_maker_on = 0;
 
