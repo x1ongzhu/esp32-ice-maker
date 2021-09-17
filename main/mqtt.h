@@ -21,6 +21,6 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
-extern esp_mqtt_client_handle_t mqtt_client;
-
 void setup_mqtt(void);
+
+void send_msg();

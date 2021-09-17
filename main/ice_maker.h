@@ -6,8 +6,6 @@
 #define BTN_START 12
 #define BTN_SEL 14
 
-static unsigned int ice_maker_on = 0;
-
 void init_ice_maker(void);
 
 void start_making_ice(void);

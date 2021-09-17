@@ -12,6 +12,7 @@
 #include "ice_maker.h"
 
 static const char *TAG = "MQTT";
+static esp_mqtt_client_handle_t mqtt_client;
 
 static void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -92,12 +93,19 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 void setup_mqtt(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .uri = "mqtt://192.168.50.242",
-        .username = "drew",
-        .password = "x1ongDrew"};
+        .uri = "mqtt://192.168.50.116",
+    };
 
-    esp_mqtt_client_handle_t mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
+    mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
     /* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
     esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
     esp_mqtt_client_start(mqtt_client);
+}
+
+void send_msg(char *topic, char *data)
+{
+    if (mqtt_client != NULL)
+    {
+        esp_mqtt_client_publish(mqtt_client, topic, data, 0, 0, 0);
+    }
 }
