@@ -17,8 +17,7 @@ typedef enum
 static const char *TAG = "ICE_MAKER";
 static ice_maker_status_t current_status;
 
-static void
-pcnt_init(int unit, int gpio)
+static void pcnt_init(int unit, int gpio)
 {
     pcnt_config_t pcnt_config = {
         .pulse_gpio_num = gpio,
@@ -27,7 +26,7 @@ pcnt_init(int unit, int gpio)
         .unit = unit,
         .pos_mode = PCNT_COUNT_INC,
         .neg_mode = PCNT_COUNT_DIS,
-        .lctrl_mode = PCNT_MODE_REVERSE,
+        .lctrl_mode = PCNT_MODE_KEEP,
         .hctrl_mode = PCNT_MODE_KEEP,
         .counter_h_lim = 10000,
         .counter_l_lim = -10000,
@@ -63,12 +62,31 @@ static void status_check_task(void *arg)
         pcnt_counter_resume(PCNT_UNIT_0);
         pcnt_counter_resume(PCNT_UNIT_1);
 
+        if (count_0 > 110)
+        {
+            current_status = ICE_MAKER_STATUS_WORKING;
+        }
+        else if (count_0 > 50)
+        {
+            current_status = ICE_MAKER_STATUS_IDEL;
+        }
+
+        if (current_status == ICE_MAKER_STATUS_IDEL)
+        {
+            send_msg("home/ice_maker/get", "OFF");
+        }
+        else if (current_status == ICE_MAKER_STATUS_WORKING)
+        {
+            send_msg("home/ice_maker/get", "ON");
+        }
+
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
 void init_ice_maker(void)
 {
+    current_status = ICE_MAKER_STATUS_IDEL;
     gpio_config_t io_conf;
     io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.mode = GPIO_MODE_OUTPUT;
@@ -88,22 +106,26 @@ void init_ice_maker(void)
 
 void start_making_ice(void)
 {
+    ESP_LOGI(TAG, "start");
     if (current_status == ICE_MAKER_STATUS_IDEL)
     {
+        ESP_LOGI(TAG, "start gpio");
         gpio_set_level(BTN_START, 0);
         vTaskDelay(pdMS_TO_TICKS(200));
-        gpio_set_level(BTN_START, 0);
+        gpio_set_level(BTN_START, 1);
         send_msg("/home/ice_maker/get", "ON");
     }
 }
 
 void stop_making_ice(void)
 {
+    ESP_LOGI(TAG, "stop");
     if (current_status == ICE_MAKER_STATUS_WORKING)
     {
+        ESP_LOGI(TAG, "stop gpio");
         gpio_set_level(BTN_START, 0);
         vTaskDelay(pdMS_TO_TICKS(200));
-        gpio_set_level(BTN_START, 0);
+        gpio_set_level(BTN_START, 1);
         send_msg("/home/ice_maker/get", "OFF");
     }
 }
